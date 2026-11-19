@@ -1,0 +1,25 @@
+name: prt-safe
+on: pull_request_target
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4   # no ref: checks out the base branch, not the PR
+      - run: ./scripts/test.sh
+      - name: What can this job reach?
+        env:
+          DEMO_SECRET: ${{ secrets.DEMO_SECRET }}
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          echo "event=$GITHUB_EVENT_NAME ref=$GITHUB_REF sha=${GITHUB_SHA:0:7}"
+          echo "repo secret length: ${#DEMO_SECRET}"
+          if gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/labels" -f "labels[]=probe-$GITHUB_WORKFLOW" >/dev/null 2>err.txt; then
+            echo "GITHUB_TOKEN write: yes (label added)"
+          else
+            echo "GITHUB_TOKEN write: no ($(grep -o "HTTP [0-9]*" err.txt | head -1))"
+          fi

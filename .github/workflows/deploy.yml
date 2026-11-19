@@ -1,0 +1,19 @@
+name: deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+  pull_request_target:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy (dummy)
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "event=$GITHUB_EVENT_NAME ref=$GITHUB_REF"
+          echo "environment secret length: ${#DEPLOY_TOKEN}"

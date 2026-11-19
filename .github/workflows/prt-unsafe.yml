@@ -1,0 +1,16 @@
+name: prt-unsafe
+on: pull_request_target
+permissions:
+  contents: read
+jobs:
+  test-pr-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}   # DANGEROUS: the fork's code
+          persist-credentials: false
+      - name: Run the PR's tests with a secret in the environment
+        env:
+          DEMO_SECRET: ${{ secrets.DEMO_SECRET }}
+        run: ./scripts/test.sh
