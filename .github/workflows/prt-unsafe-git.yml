@@ -1,0 +1,19 @@
+name: prt-unsafe-git
+on: pull_request_target
+permissions:
+  contents: read
+jobs:
+  test-pr-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4   # base branch: allowed
+        with:
+          persist-credentials: false
+      - name: Fetch the PR head by hand (DANGEROUS, and not caught by the checkout guard)
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: git fetch -q origin "pull/$PR/head" && git checkout -q FETCH_HEAD
+      - name: Run the PR's tests with a secret in the environment
+        env:
+          DEMO_SECRET: ${{ secrets.DEMO_SECRET }}
+        run: ./scripts/test.sh
